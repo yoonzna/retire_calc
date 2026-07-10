@@ -1,5 +1,5 @@
-<!-- 스마트 노후 자금 계산기 v5 (독립 실행 및 배포 최적화 최종본) -->
-<div class="calc-wrapper" style="font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #F8FAFC; color: #1E293B; padding: 24px 16px 80px 16px; max-width: 800px; margin: 0 auto; box-sizing: border-box; line-height: 1.5; -webkit-font-smoothing: antialiased;">
+<!-- 스마트 노후 자금 계산기 v6 (580px 이하 초압축 모바일 최적화 버전) -->
+<div class="calc-wrapper" style="font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background-color: #F8FAFC; color: #1E293B; padding: 12px 10px 12px 10px; max-width: 100%; width: 100%; height: 556px; max-height: 556px; box-sizing: border-box; line-height: 1.4; -webkit-font-smoothing: antialiased; overflow: hidden; position: relative;">
     
     <!-- 전용 스타일 정의 -->
     <style>
@@ -17,29 +17,29 @@
             -moz-appearance: textfield; 
         }
         
-        /* 버튼 클릭 시 튕기는 모션 */
+        /* 버튼 클릭 모션 */
         .calc-btn-active:active { 
             transform: scale(0.97); 
         }
         
-        /* 슬라이더(Range) 커스텀 디자인 */
+        /* 슬라이더 커스텀 디자인 */
         .calc-range-slider {
             -webkit-appearance: none; 
             width: 100%; 
             background: transparent; 
             cursor: pointer;
-            height: 32px;
+            height: 24px;
             display: flex;
             align-items: center;
         }
         .calc-range-slider::-webkit-slider-thumb {
             -webkit-appearance: none; 
-            height: 24px; 
-            width: 24px; 
+            height: 18px; 
+            width: 18px; 
             border-radius: 50%;
             background: #EA580C; 
-            margin-top: -8px; 
-            box-shadow: 0 2px 6px rgba(234, 88, 12, 0.4);
+            margin-top: -6px; 
+            box-shadow: 0 1px 4px rgba(234, 88, 12, 0.4);
             border: none;
             transition: transform 0.1s ease;
         }
@@ -48,225 +48,193 @@
         }
         .calc-range-slider::-webkit-slider-runnable-track {
             width: 100%; 
-            height: 8px; 
+            height: 6px; 
             background: #E2E8F0; 
-            border-radius: 4px;
+            border-radius: 3px;
         }
         .calc-range-slider:focus { 
             outline: none; 
         }
 
-        /* 그리드 시스템 반응형 대응 */
+        /* 2열 그리드 구조 */
         .calc-grid-layout {
             display: grid;
-            grid-template-columns: 1fr;
-            gap: 24px;
-        }
-        @media (min-width: 640px) {
-            .calc-grid-layout {
-                grid-template-columns: 1fr 1fr;
-                gap: 32px;
-            }
+            grid-template-columns: 1.1fr 1fr;
+            gap: 12px;
         }
         
-        /* 결과 카드 내부 레이아웃 반응형 대응 */
+        /* 결과 카드 레이아웃 */
         .calc-result-layout {
-            display: flex;
-            flex-direction: column;
-            gap: 24px;
-        }
-        @media (min-width: 640px) {
-            .calc-result-layout {
-                flex-direction: row;
-                gap: 0;
-            }
-            .calc-result-left {
-                flex: 1.1;
-                border-right: 1px solid rgba(255, 255, 255, 0.2);
-                padding-right: 32px;
-            }
-            .calc-result-right {
-                flex: 0.9;
-                padding-left: 32px;
-            }
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
         }
     </style>
 
-    <div style="display: flex; flex-direction: column; gap: 32px; width: 100%;">
+    <div style="display: flex; flex-direction: column; gap: 8px; width: 100%; height: 100%;">
         
-        <!-- 1. 헤더 영역 -->
-        <header style="text-align: center; margin-bottom: 8px;">
-            <!-- 보안 필터가 지우지 못하도록 이모지(🐷) 기반 초고대응 아이콘으로 설계 변경 -->
-            <div style="display: inline-flex; align-items: center; justify-content: center; width: 64px; height: 64px; border-radius: 50%; background-color: #FFEDD5; color: #EA580C; margin-bottom: 16px; box-shadow: 0 4px 6px -1px rgba(234, 88, 12, 0.15);">
-                <span style="font-size: 32px; line-height: 1; user-select: none;">🐷</span>
-            </div>
-            <h1 style="font-size: 32px; font-weight: 900; color: #0F172A; margin: 0 0 12px 0; letter-spacing: -0.03em;">
+        <!-- 1. 헤더 영역 (초슬림 디자인) -->
+        <header style="display: flex; align-items: center; gap: 8px; margin-bottom: 2px; border-bottom: 1px solid #E2E8F0; padding-bottom: 4px;">
+            <span style="font-size: 22px; line-height: 1; user-select: none;">🐷</span>
+            <h1 style="font-size: 16px; font-weight: 800; color: #0F172A; margin: 0; letter-spacing: -0.03em;">
                 스마트 노후자금 <span style="color: #EA580C;">계산기</span>
             </h1>
-            <p style="font-size: 16px; color: #475569; font-weight: 700; margin: 0; word-break: keep-all;">
-                막연한 은퇴 후의 삶, 필요한 자금이 얼마인지 정확히 알아보세요.
-            </p>
+            <span style="font-size: 11px; color: #64748B; font-weight: 500; margin-left: auto;">인터넷 무관 실시간 작동</span>
         </header>
 
         <!-- 2. 입력 설정 영역 -->
-        <section style="background-color: #FFFFFF; padding: 28px; border-radius: 24px; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -4px rgba(0, 0, 0, 0.05); border: 1px solid #E2E8F0;">
+        <section style="background-color: #FFFFFF; padding: 10px; border-radius: 12px; border: 1px solid #E2E8F0; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
             <div class="calc-grid-layout">
                 
                 <!-- 왼쪽 섹션: 나이 설정 슬라이더 -->
-                <div style="display: flex; flex-direction: column; gap: 24px;">
+                <div style="display: flex; flex-direction: column; gap: 8px;">
                     <!-- 현재 나이 -->
                     <div>
-                        <label style="display: block; color: #334155; font-weight: 700; margin-bottom: 8px; font-size: 17px;">현재 나이</label>
-                        <div style="display: flex; align-items: center; gap: 16px;">
-                            <input type="range" class="calc-current-age-range calc-range-slider" min="30" max="65" value="50">
-                            <!-- 완전 물리식 Flex 구조의 겹침 전면 방어 박스 -->
-                            <div style="display: flex; align-items: center; background-color: #F8FAFC; border: 1px solid #CBD5E1; border-radius: 12px; padding: 0 12px; width: 110px; height: 44px; flex-shrink: 0; box-sizing: border-box;">
-                                <input type="number" class="calc-current-age-input" style="width: 100%; flex: 1; min-width: 0; border: none; background: transparent; font-size: 18px; font-weight: 700; text-align: right; outline: none; margin: 0; padding: 0; color: #1E293B;" value="50">
-                                <span style="color: #64748B; font-weight: 700; font-size: 14px; margin-left: 4px; flex-shrink: 0;">세</span>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px;">
+                            <span style="color: #475569; font-weight: 700; font-size: 12px;">현재 나이</span>
+                            <div style="display: flex; align-items: center; background-color: #F8FAFC; border: 1px solid #CBD5E1; border-radius: 6px; padding: 0 4px; width: 64px; height: 22px;">
+                                <input type="number" class="calc-current-age-input" style="width: 100%; border: none; background: transparent; font-size: 12px; font-weight: 700; text-align: right; outline: none; padding: 0; color: #1E293B;" value="50">
+                                <span style="color: #64748B; font-weight: 700; font-size: 10px; margin-left: 2px;">세</span>
                             </div>
                         </div>
+                        <input type="range" class="calc-current-age-range calc-range-slider" min="30" max="65" value="50">
                     </div>
 
                     <!-- 은퇴 예상 나이 -->
                     <div>
-                        <label style="display: block; color: #334155; font-weight: 700; margin-bottom: 8px; font-size: 17px;">은퇴 예상 나이</label>
-                        <div style="display: flex; align-items: center; gap: 16px;">
-                            <input type="range" class="calc-retire-age-range calc-range-slider" min="50" max="75" value="60">
-                            <div style="display: flex; align-items: center; background-color: #F8FAFC; border: 1px solid #CBD5E1; border-radius: 12px; padding: 0 12px; width: 110px; height: 44px; flex-shrink: 0; box-sizing: border-box;">
-                                <input type="number" class="calc-retire-age-input" style="width: 100%; flex: 1; min-width: 0; border: none; background: transparent; font-size: 18px; font-weight: 700; text-align: right; outline: none; margin: 0; padding: 0; color: #1E293B;" value="60">
-                                <span style="color: #64748B; font-weight: 700; font-size: 14px; margin-left: 4px; flex-shrink: 0;">세</span>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px;">
+                            <span style="color: #475569; font-weight: 700; font-size: 12px;">은퇴 나이</span>
+                            <div style="display: flex; align-items: center; background-color: #F8FAFC; border: 1px solid #CBD5E1; border-radius: 6px; padding: 0 4px; width: 64px; height: 22px;">
+                                <input type="number" class="calc-retire-age-input" style="width: 100%; border: none; background: transparent; font-size: 12px; font-weight: 700; text-align: right; outline: none; padding: 0; color: #1E293B;" value="60">
+                                <span style="color: #64748B; font-weight: 700; font-size: 10px; margin-left: 2px;">세</span>
                             </div>
                         </div>
+                        <input type="range" class="calc-retire-age-range calc-range-slider" min="50" max="75" value="60">
                     </div>
 
                     <!-- 예상 수명 -->
                     <div>
-                        <label style="display: block; color: #334155; font-weight: 700; margin-bottom: 8px; font-size: 17px;">예상 수명</label>
-                        <div style="display: flex; align-items: center; gap: 16px;">
-                            <input type="range" class="calc-life-exp-range calc-range-slider" min="70" max="100" value="85">
-                            <div style="display: flex; align-items: center; background-color: #F8FAFC; border: 1px solid #CBD5E1; border-radius: 12px; padding: 0 12px; width: 110px; height: 44px; flex-shrink: 0; box-sizing: border-box;">
-                                <input type="number" class="calc-life-exp-input" style="width: 100%; flex: 1; min-width: 0; border: none; background: transparent; font-size: 18px; font-weight: 700; text-align: right; outline: none; margin: 0; padding: 0; color: #1E293B;" value="85">
-                                <span style="color: #64748B; font-weight: 700; font-size: 14px; margin-left: 4px; flex-shrink: 0;">세</span>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px;">
+                            <span style="color: #475569; font-weight: 700; font-size: 12px;">예상 수명</span>
+                            <div style="display: flex; align-items: center; background-color: #F8FAFC; border: 1px solid #CBD5E1; border-radius: 6px; padding: 0 4px; width: 64px; height: 22px;">
+                                <input type="number" class="calc-life-exp-input" style="width: 100%; border: none; background: transparent; font-size: 12px; font-weight: 700; text-align: right; outline: none; padding: 0; color: #1E293B;" value="85">
+                                <span style="color: #64748B; font-weight: 700; font-size: 10px; margin-left: 2px;">세</span>
                             </div>
                         </div>
+                        <input type="range" class="calc-life-exp-range calc-range-slider" min="70" max="100" value="85">
                     </div>
                 </div>
 
                 <!-- 오른쪽 섹션: 가구 타입 및 생활비 입력 -->
-                <div style="display: flex; flex-direction: column; gap: 24px; justify-content: space-between;">
+                <div style="display: flex; flex-direction: column; gap: 6px; justify-content: space-between;">
                     <!-- 가구 형태 선택 -->
                     <div>
-                        <label style="display: block; color: #334155; font-weight: 700; margin-bottom: 12px; font-size: 17px;">가구 형태</label>
-                        <div style="display: flex; background-color: #F1F5F9; padding: 6px; border-radius: 14px;">
-                            <button class="calc-btn-single calc-btn-active" style="flex: 1; padding: 10px; border-radius: 10px; font-size: 15px; font-weight: 700; border: none; cursor: pointer; background: transparent; color: #64748B; transition: all 0.2s; outline: none;">1인 가구</button>
-                            <button class="calc-btn-couple calc-btn-active" style="flex: 1; padding: 10px; border-radius: 10px; font-size: 15px; font-weight: 700; border: none; cursor: pointer; background: #FFFFFF; color: #EA580C; box-shadow: 0 1px 3px rgba(0,0,0,0.1); transition: all 0.2s; outline: none;">부부 (2인 가구)</button>
+                        <span style="display: block; color: #475569; font-weight: 700; margin-bottom: 4px; font-size: 12px;">가구 형태</span>
+                        <div style="display: flex; background-color: #F1F5F9; padding: 2px; border-radius: 6px;">
+                            <button class="calc-btn-single calc-btn-active" style="flex: 1; padding: 4px; border-radius: 4px; font-size: 11px; font-weight: 700; border: none; cursor: pointer; background: transparent; color: #64748B; outline: none; transition: all 0.1s;">1인 가구</button>
+                            <button class="calc-btn-couple calc-btn-active" style="flex: 1; padding: 4px; border-radius: 4px; font-size: 11px; font-weight: 700; border: none; cursor: pointer; background: #FFFFFF; color: #EA580C; box-shadow: 0 1px 2px rgba(0,0,0,0.05); outline: none; transition: all 0.1s;">부부 (2인)</button>
                         </div>
                     </div>
 
                     <!-- 희망 노후 생활비 -->
                     <div>
-                        <label style="display: block; color: #334155; font-weight: 700; margin-bottom: 8px; font-size: 17px;">희망하는 노후 생활비 (월)</label>
-                        <!-- 완전 물리식 Flex 구조의 희망 생활비 겹침 전면 방어 박스 -->
-                        <div style="display: flex; align-items: center; background-color: #F8FAFC; border: 1px solid #CBD5E1; border-radius: 14px; padding: 0 16px; height: 60px; width: 100%; box-sizing: border-box;">
-                            <input type="number" class="calc-monthly-expense-input" style="flex: 1; width: 100%; min-width: 0; border: none; background: transparent; font-size: 26px; font-weight: 800; text-align: right; color: #1E293B; outline: none; margin: 0; padding: 0;" value="300">
-                            <span style="color: #475569; font-weight: 800; font-size: 18px; margin-left: 8px; flex-shrink: 0;">만 원</span>
+                        <span style="display: block; color: #475569; font-weight: 700; margin-bottom: 4px; font-size: 12px;">노후 생활비 (월)</span>
+                        <div style="display: flex; align-items: center; background-color: #F8FAFC; border: 1px solid #CBD5E1; border-radius: 8px; padding: 0 8px; height: 32px; width: 100%; box-sizing: border-box;">
+                            <input type="number" class="calc-monthly-expense-input" style="flex: 1; width: 100%; min-width: 0; border: none; background: transparent; font-size: 16px; font-weight: 800; text-align: right; color: #1E293B; outline: none; margin: 0; padding: 0;" value="300">
+                            <span style="color: #475569; font-weight: 800; font-size: 11px; margin-left: 4px; flex-shrink: 0;">만 원</span>
                         </div>
                         
                         <!-- 생활비 퀵 프리셋 버튼 -->
-                        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 14px;">
-                            <button class="calc-preset-btn-1 calc-btn-active" style="padding: 10px 4px; display: flex; flex-direction: column; align-items: center; justify-content: center; background-color: #FFF7ED; color: #C2410C; border-radius: 12px; border: 1px solid #FFEDD5; cursor: pointer; outline: none;">
-                                <span style="font-size: 11px; font-weight: 600; color: #F97316; margin-bottom: 2px;">최소 생활비</span>
-                                <span class="calc-preset-text-1" style="font-weight: 800; font-size: 16px;">200만</span>
+                        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; margin-top: 6px;">
+                            <button class="calc-preset-btn-1 calc-btn-active" style="padding: 4px 2px; display: flex; flex-direction: column; align-items: center; justify-content: center; background-color: #FFF7ED; color: #C2410C; border-radius: 6px; border: 1px solid #FFEDD5; cursor: pointer; outline: none;">
+                                <span style="font-size: 8px; font-weight: 600; color: #F97316;">최소</span>
+                                <span class="calc-preset-text-1" style="font-weight: 800; font-size: 11px;">200만</span>
                             </button>
-                            <button class="calc-preset-btn-2 calc-btn-active" style="padding: 10px 4px; display: flex; flex-direction: column; align-items: center; justify-content: center; background-color: #FFF7ED; color: #C2410C; border-radius: 12px; border: 1px solid #FFEDD5; cursor: pointer; outline: none;">
-                                <span style="font-size: 11px; font-weight: 600; color: #F97316; margin-bottom: 2px;">적정 생활비</span>
-                                <span class="calc-preset-text-2" style="font-weight: 800; font-size: 16px;">300만</span>
+                            <button class="calc-preset-btn-2 calc-btn-active" style="padding: 4px 2px; display: flex; flex-direction: column; align-items: center; justify-content: center; background-color: #FFF7ED; color: #C2410C; border-radius: 6px; border: 1px solid #FFEDD5; cursor: pointer; outline: none;">
+                                <span style="font-size: 8px; font-weight: 600; color: #F97316;">적정</span>
+                                <span class="calc-preset-text-2" style="font-weight: 800; font-size: 11px;">300만</span>
                             </button>
-                            <button class="calc-preset-btn-3 calc-btn-active" style="padding: 10px 4px; display: flex; flex-direction: column; align-items: center; justify-content: center; background-color: #FFF7ED; color: #C2410C; border-radius: 12px; border: 1px solid #FFEDD5; cursor: pointer; outline: none;">
-                                <span style="font-size: 11px; font-weight: 600; color: #F97316; margin-bottom: 2px;">여유 생활비</span>
-                                <span class="calc-preset-text-3" style="font-weight: 800; font-size: 16px;">500만</span>
+                            <button class="calc-preset-btn-3 calc-btn-active" style="padding: 4px 2px; display: flex; flex-direction: column; align-items: center; justify-content: center; background-color: #FFF7ED; color: #C2410C; border-radius: 6px; border: 1px solid #FFEDD5; cursor: pointer; outline: none;">
+                                <span style="font-size: 8px; font-weight: 600; color: #F97316;">여유</span>
+                                <span class="calc-preset-text-3" style="font-weight: 800; font-size: 11px;">500만</span>
                             </button>
                         </div>
-                    </div>
-                    
-                    <div style="text-align: right; margin-top: 8px;">
-                        <p style="font-size: 11px; color: #94A3B8; margin: 0;">* 숫자를 직접 타이핑하거나 퀵 선택 버튼을 눌러주세요.</p>
                     </div>
                 </div>
             </div>
         </section>
 
-        <!-- 3. 결과 대시보드 영역 -->
-        <section style="background-color: #EA580C; padding: 32px; border-radius: 28px; box-shadow: 0 20px 25px -5px rgba(234, 88, 12, 0.25); color: #FFFFFF;">
+        <!-- 3. 결과 대시보드 영역 (컴팩트 최적화) -->
+        <section style="background-color: #EA580C; padding: 12px; border-radius: 12px; box-shadow: 0 4px 10px rgba(234, 88, 12, 0.15); color: #FFFFFF; flex: 1; display: flex; flex-direction: column; justify-content: space-between; min-height: 160px;">
             <div class="calc-result-layout">
                 
                 <!-- 결과 왼쪽: 세부 요약 정보 -->
-                <div class="calc-result-left" style="display: flex; flex-direction: column; justify-content: space-between;">
+                <div style="display: flex; flex-direction: column; justify-content: space-between; border-right: 1px solid rgba(255, 255, 255, 0.2); padding-right: 8px;">
                     <div>
-                        <p style="color: #FFEDD5; font-weight: 800; margin: 0 0 16px 0; font-size: 18px; letter-spacing: -0.02em;">나의 노후 요약</p>
-                        <div style="display: flex; align-items: baseline; gap: 8px; margin-bottom: 10px;">
-                            <span style="color: #FFEDD5; font-weight: 600; font-size: 15px;">은퇴까지 남은 시간:</span>
-                            <span class="calc-years-to-retire" style="font-size: 26px; font-weight: 900; color: #FFFFFF;">10년</span>
+                        <span style="color: #FFEDD5; font-weight: 800; font-size: 12px; display: block; margin-bottom: 4px;">나의 노후 요약</span>
+                        <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 2px;">
+                            <span style="color: #FFEDD5; font-size: 10px;">은퇴까지 시간:</span>
+                            <span class="calc-years-to-retire" style="font-size: 15px; font-weight: 900; color: #FFFFFF;">10년</span>
                         </div>
-                        <div style="display: flex; align-items: baseline; gap: 8px; margin-bottom: 20px;">
-                            <span style="color: #FFEDD5; font-weight: 600; font-size: 15px;">은퇴 후 생활 기간:</span>
-                            <span class="calc-years-in-retirement" style="font-size: 26px; font-weight: 900; color: #FFFFFF;">25년</span>
+                        <div style="display: flex; justify-content: space-between; align-items: baseline;">
+                            <span style="color: #FFEDD5; font-size: 10px;">은퇴 후 생활:</span>
+                            <span class="calc-years-in-retirement" style="font-size: 15px; font-weight: 900; color: #FFFFFF;">25년</span>
                         </div>
                     </div>
                     
-                    <div style="background-color: rgba(194, 65, 12, 0.4); padding: 18px; border-radius: 16px; border: 1px solid rgba(255, 255, 255, 0.15); margin-top: 8px;">
-                        <p class="calc-insight-text" style="font-size: 14px; line-height: 1.65; margin: 0; word-break: keep-all; color: #FFE3D8;">
-                            지금부터 매월 <strong>...원</strong>씩 모아야 은퇴 후 <strong>...년</strong> 동안 생활비로 쓸 수 있습니다.
+                    <div style="background-color: rgba(194, 65, 12, 0.4); padding: 6px; border-radius: 6px; border: 1px solid rgba(255, 255, 255, 0.1); margin-top: 6px;">
+                        <p class="calc-insight-text" style="font-size: 10px; line-height: 1.4; margin: 0; word-break: keep-all; color: #FFE3D8;">
+                            지금부터 매월 <strong>...원</strong>씩 모아야 노후를 대비할 수 있습니다.
                         </p>
                     </div>
                 </div>
 
-                <!-- 모바일 구분선 -->
-                <div class="calc-mobile-divider" style="height: 1px; background-color: rgba(255,255,255,0.15); margin: 8px 0; display: block;"></div>
-
                 <!-- 결과 오른쪽: 자금 핵심 지표 -->
-                <div class="calc-result-right" style="display: flex; flex-direction: column; justify-content: center;">
-                    <p style="color: #FFEDD5; font-weight: 800; margin: 0 0 4px 0; font-size: 18px; letter-spacing: -0.02em;">노후에 필요한 총 자금</p>
-                    <div style="display: flex; align-items: baseline; gap: 4px; margin-bottom: 28px;">
-                        <span class="calc-total-required" style="font-size: 52px; font-weight: 900; color: #FEF08A; letter-spacing: -0.04em; line-height: 1;">6억</span>
-                        <span class="calc-total-required-detail" style="font-size: 22px; font-weight: 800; color: #FEF9C3;"></span>
+                <div style="display: flex; flex-direction: column; justify-content: center; padding-left: 8px;">
+                    <div>
+                        <span style="color: #FFEDD5; font-weight: 800; font-size: 11px; display: block; margin-bottom: 2px;">노후에 필요한 총 자금</span>
+                        <div style="display: flex; align-items: baseline; gap: 2px; margin-bottom: 8px;">
+                            <span class="calc-total-required" style="font-size: 26px; font-weight: 900; color: #FEF08A; letter-spacing: -0.04em; line-height: 1;">9억</span>
+                            <span class="calc-total-required-detail" style="font-size: 13px; font-weight: 800; color: #FEF9C3;"></span>
+                        </div>
                     </div>
 
-                    <p style="color: #FFEDD5; font-weight: 800; margin: 0 0 4px 0; font-size: 14px; letter-spacing: -0.01em;">지금부터 매월 준비할 금액</p>
-                    <div style="display: flex; align-items: baseline; gap: 2px;">
-                        <span class="calc-monthly-saving" style="font-size: 38px; font-weight: 900; color: #FFFFFF; letter-spacing: -0.04em; line-height: 1;">500만</span>
-                        <span style="font-size: 18px; font-weight: 800; color: #FFEDD5;">원</span>
+                    <div>
+                        <span style="color: #FFEDD5; font-weight: 800; font-size: 10px; display: block; margin-bottom: 2px;">매월 준비할 금액</span>
+                        <div style="display: flex; align-items: baseline; gap: 1px;">
+                            <span class="calc-monthly-saving" style="font-size: 20px; font-weight: 900; color: #FFFFFF; letter-spacing: -0.04em; line-height: 1;">300만</span>
+                            <span style="font-size: 12px; font-weight: 800; color: #FFEDD5;">원</span>
+                        </div>
                     </div>
-                    <p style="font-size: 11px; color: #FFEDD5; opacity: 0.85; margin: 10px 0 0 0;">* 물가상승률, 이자율을 배제한 단순 합산 금액 기준입니다.</p>
                 </div>
 
             </div>
+            
+            <p style="font-size: 9px; color: #FFEDD5; opacity: 0.85; margin: 6px 0 0 0; text-align: center;">* 물가상승률, 이자율을 배제한 단순 합산 금액 기준입니다.</p>
         </section>
 
-        <!-- 4. 액션 버튼 -->
-        <button class="calc-btn-share calc-btn-active" style="width: 100%; background-color: #FEE500; color: #1E1E1E; font-weight: 900; font-size: 18px; padding: 18px; border-radius: 20px; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; transition: background-color 0.2s, transform 0.1s; outline: none; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);">
-            <!-- 카카오톡 말풍선 SVG를 고대비 텍스트 이모지로 변경하여 안전하게 렌더링되도록 격리 -->
-            <span style="font-size: 22px; line-height: 1; user-select: none;">💬</span>
-            내 노후자금 계산 결과 공유하기
+        <!-- 4. 액션 버튼 (공유용) -->
+        <button class="calc-btn-share calc-btn-active" style="width: 100%; background-color: #FEE500; color: #1E1E1E; font-weight: 900; font-size: 14px; padding: 10px; border-radius: 8px; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; transition: background-color 0.2s, transform 0.1s; outline: none; margin-top: auto;">
+            <span style="font-size: 16px; line-height: 1; user-select: none;">💬</span>
+            계산 결과 친구에게 공유하기
         </button>
 
     </div>
 
-    <!-- 브라우저 alert 정지를 우회하는 안전한 커스텀 토스트 알림 컴포넌트 -->
-    <div class="calc-toast" style="position: fixed; bottom: -60px; left: 50%; transform: translateX(-50%); background-color: #1E293B; color: #FFFFFF; padding: 12px 24px; border-radius: 50px; font-size: 14px; font-weight: 700; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3); transition: bottom 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); z-index: 999999; display: flex; align-items: center; gap: 8px;">
-        <span style="font-size: 16px; line-height: 1;">✔️</span>
-        <span>결과 공유 링크가 준비되었습니다!</span>
+    <!-- 안전한 브라우저 메시지용 토스트 노출 장치 -->
+    <div class="calc-toast" style="position: fixed; bottom: -50px; left: 50%; transform: translateX(-50%); background-color: #1E293B; color: #FFFFFF; padding: 8px 16px; border-radius: 20px; font-size: 11px; font-weight: 700; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2); transition: bottom 0.3s ease; z-index: 999999; display: flex; align-items: center; gap: 6px; white-space: nowrap;">
+        <span>✔️</span>
+        <span>결과 공유 링크가 클립보드에 복사되었습니다!</span>
     </div>
 
     <!-- 5. 뇌 역할을 해주는 자바스크립트 영역 (Pure Javascript 격리화 설계) -->
     <script>
         (function() {
-            // 외부 CSP(Unsafe-eval) 차단을 완벽히 통과하는 순수 안전한 네이티브 함수 바인딩
             function initializeCalculatorInstance(wrapper) {
                 if (wrapper.__calc_executed) return;
-                wrapper.__calc_executed = true; // 중복 바인딩 전면 원천 차단
+                wrapper.__calc_executed = true; // 중복 마운트 원천 방지
 
-                // UI 엘리먼트 내부 스코프 캐싱
+                // UI 엘리먼트 캐싱
                 const currentAgeRange = wrapper.querySelector('.calc-current-age-range');
                 const currentAgeInput = wrapper.querySelector('.calc-current-age-input');
                 const retireAgeRange = wrapper.querySelector('.calc-retire-age-range');
@@ -298,7 +266,7 @@
                 let currentPreset2 = 300;
                 let currentPreset3 = 500;
 
-                // 1. 현재 나이 바인딩
+                // 1. 현재 나이 동기화 및 유효성 바인딩
                 if (currentAgeRange && currentAgeInput) {
                     currentAgeRange.addEventListener('input', function() {
                         let val = parseInt(this.value) || 30;
@@ -329,7 +297,7 @@
                     });
                 }
 
-                // 2. 은퇴 예정 나이 바인딩
+                // 2. 은퇴 예정 나이 동기화 및 유효성 바인딩
                 if (retireAgeRange && retireAgeInput) {
                     retireAgeRange.addEventListener('input', function() {
                         let val = parseInt(this.value) || 50;
@@ -367,7 +335,7 @@
                     });
                 }
 
-                // 3. 예상 수명 바인딩
+                // 3. 예상 수명 동기화 및 유효성 바인딩
                 if (lifeExpRange && lifeExpInput) {
                     lifeExpRange.addEventListener('input', function() {
                         let val = parseInt(this.value) || 70;
@@ -422,14 +390,21 @@
                     presetBtn3.addEventListener('click', function() { setExpense(currentPreset3); });
                 }
 
-                // 7. 결과 공유 기능 바인딩
+                // 7. 결과 공유 기능 바인딩 (클립보드 강제 우회 복사)
                 if (btnShare) {
                     btnShare.addEventListener('click', function() {
+                        const tempInput = document.createElement('input');
+                        tempInput.value = window.location.href;
+                        document.body.appendChild(tempInput);
+                        tempInput.select();
+                        document.execCommand('copy');
+                        document.body.removeChild(tempInput);
+
                         const toast = wrapper.querySelector('.calc-toast');
                         if (toast) {
-                            toast.style.bottom = '20px';
+                            toast.style.bottom = '12px';
                             setTimeout(function() {
-                                toast.style.bottom = '-60px';
+                                toast.style.bottom = '-50px';
                             }, 2500);
                         }
                     });
@@ -440,7 +415,7 @@
                     if (type === 'single') {
                         btnSingle.style.backgroundColor = '#FFFFFF';
                         btnSingle.style.color = '#EA580C';
-                        btnSingle.style.boxShadow = '0 1px 3px rgba(0,0,0,0.1)';
+                        btnSingle.style.boxShadow = '0 1px 2px rgba(0,0,0,0.05)';
                         
                         btnCouple.style.backgroundColor = 'transparent';
                         btnCouple.style.color = '#64748B';
@@ -452,7 +427,7 @@
                     } else {
                         btnCouple.style.backgroundColor = '#FFFFFF';
                         btnCouple.style.color = '#EA580C';
-                        btnCouple.style.boxShadow = '0 1px 3px rgba(0,0,0,0.1)';
+                        btnCouple.style.boxShadow = '0 1px 2px rgba(0,0,0,0.05)';
                         
                         btnSingle.style.backgroundColor = 'transparent';
                         btnSingle.style.color = '#64748B';
@@ -488,7 +463,7 @@
                     if (eok > 0) {
                         main = eok + "억";
                         if (remainder > 0) {
-                            detail = remainder.toLocaleString() + "만 원";
+                            detail = remainder.toLocaleString() + "만";
                         } else {
                             detail = "원";
                         }
@@ -517,7 +492,7 @@
                          if (totalRequiredEl) totalRequiredEl.innerText = "0";
                          if (totalRequiredDetailEl) totalRequiredDetailEl.innerText = "원";
                          if (monthlySavingEl) monthlySavingEl.innerText = "0";
-                         if (insightTextEl) insightTextEl.innerHTML = "나이 및 수명 조건이 올바르지 않습니다.";
+                         if (insightTextEl) insightTextEl.innerHTML = "조건이 올바르지 않습니다.";
                          return;
                     }
 
@@ -535,24 +510,14 @@
                     if (monthlySavingEl) monthlySavingEl.innerText = monthlySavingManwon.toLocaleString() + '만';
                     
                     if (insightTextEl) {
-                        insightTextEl.innerHTML = "지금부터 매월 <strong style='color:#FFF;'>" + monthlySavingManwon.toLocaleString() + "만 원</strong>씩 모아야 은퇴 후 <strong style='color:#FFF;'>" + yearsInRetirement + "년</strong> 동안 월 <strong style='color:#FFF;'>" + monthlyExpense + "만 원</strong>의 생활비를 쓸 수 있습니다.";
+                        insightTextEl.innerHTML = "매월 <strong style='color:#FFF;'>" + monthlySavingManwon.toLocaleString() + "만 원</strong>씩 모아야 월 <strong style='color:#FFF;'>" + monthlyExpense + "만 원</strong>씩 사용 가능합니다.";
                     }
                 }
 
-                // 반응형 화면 리사이즈
-                function syncDividers() {
-                    const dividers = wrapper.querySelectorAll('.calc-mobile-divider');
-                    dividers.forEach(function(el) {
-                        el.style.display = (window.innerWidth >= 640) ? 'none' : 'block';
-                    });
-                }
-
-                window.addEventListener('resize', syncDividers);
-                syncDividers();
                 calculate();
             }
 
-            // 어떠한 샌드박스, 웹뷰, 미리보기, 보안 환경이든 0.3초마다 검사하여 즉시 브레인을 부착하는 안심 부트스트랩 엔진
+            // 안전한 복합 부트스트랩 엔진
             function scanAndBootCalculators() {
                 const wrappers = document.querySelectorAll('.calc-wrapper');
                 for (let i = 0; i < wrappers.length; i++) {
@@ -560,14 +525,12 @@
                 }
             }
 
-            // DOM 준비 시점 즉시 실행 트리거
             if (document.readyState === 'loading') {
                 document.addEventListener('DOMContentLoaded', scanAndBootCalculators);
             } else {
                 scanAndBootCalculators();
             }
 
-            // [핵심] 실제 서버의 복합 프레임워크 렌더링 주기를 정밀히 감지하는 0.3초 무한 순환 보정 장치 (CSP를 절대 위반하지 않음)
             setInterval(scanAndBootCalculators, 300);
         })();
     </script>
