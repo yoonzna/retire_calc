@@ -1,539 +1,462 @@
-<!-- 스마트 노후 자금 계산기 v6 (580px 이하 초압축 모바일 최적화 버전) -->
-<div class="calc-wrapper" style="font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background-color: #F8FAFC; color: #1E293B; padding: 12px 10px 12px 10px; max-width: 100%; width: 100%; height: 556px; max-height: 556px; box-sizing: border-box; line-height: 1.4; -webkit-font-smoothing: antialiased; overflow: hidden; position: relative;">
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>노후 자금 시뮬레이터</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Pretendard Font -->
+    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.8/dist/web/static/pretendard.css" />
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     
-    <!-- 전용 스타일 정의 -->
     <style>
-        .calc-wrapper *, .calc-wrapper *::before, .calc-wrapper *::after {
-            box-sizing: border-box;
-        }
-        
-        /* 숫자 입력칸 화살표 제거 */
-        .calc-wrapper input[type="number"]::-webkit-inner-spin-button,
-        .calc-wrapper input[type="number"]::-webkit-outer-spin-button {
-            -webkit-appearance: none; 
-            margin: 0;
-        }
-        .calc-wrapper input[type="number"] { 
-            -moz-appearance: textfield; 
-        }
-        
-        /* 버튼 클릭 모션 */
-        .calc-btn-active:active { 
-            transform: scale(0.97); 
-        }
-        
-        /* 슬라이더 커스텀 디자인 */
-        .calc-range-slider {
-            -webkit-appearance: none; 
-            width: 100%; 
-            background: transparent; 
-            cursor: pointer;
-            height: 24px;
-            display: flex;
-            align-items: center;
-        }
-        .calc-range-slider::-webkit-slider-thumb {
-            -webkit-appearance: none; 
-            height: 18px; 
-            width: 18px; 
-            border-radius: 50%;
-            background: #EA580C; 
-            margin-top: -6px; 
-            box-shadow: 0 1px 4px rgba(234, 88, 12, 0.4);
-            border: none;
-            transition: transform 0.1s ease;
-        }
-        .calc-range-slider::-webkit-slider-thumb:hover {
-            transform: scale(1.1);
-        }
-        .calc-range-slider::-webkit-slider-runnable-track {
-            width: 100%; 
-            height: 6px; 
-            background: #E2E8F0; 
-            border-radius: 3px;
-        }
-        .calc-range-slider:focus { 
-            outline: none; 
+        body {
+            font-family: 'Pretendard', sans-serif;
+            background-color: #F8FAFC;
+            -webkit-font-smoothing: antialiased;
         }
 
-        /* 2열 그리드 구조 */
-        .calc-grid-layout {
-            display: grid;
-            grid-template-columns: 1.1fr 1fr;
-            gap: 12px;
+        /* 숫자 입력 화살표 제거 */
+        input[type="number"]::-webkit-inner-spin-button,
+        input[type="number"]::-webkit-outer-spin-button {
+            -webkit-appearance: none; margin: 0;
+        }
+        input[type="number"] { -moz-appearance: textfield; }
+        
+        .btn-press:active {
+            transform: scale(0.96);
+        }
+
+        /* Range Slider Styling */
+        input[type=range] {
+            -webkit-appearance: none;
+            width: 100%;
+            background: transparent;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 24px;
+            width: 24px;
+            border-radius: 50%;
+            background: #EA580C; /* Orange 600 */
+            cursor: pointer;
+            margin-top: -8px;
+            box-shadow: 0 2px 6px rgba(234, 88, 12, 0.4);
+        }
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 8px;
+            cursor: pointer;
+            background: #E2E8F0;
+            border-radius: 4px;
+        }
+        input[type=range]:focus {
+            outline: none;
         }
         
-        /* 결과 카드 레이아웃 */
-        .calc-result-layout {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
+        /* 탭 버튼 스타일 */
+        .lifestyle-tab {
+            transition: all 0.2s;
+            border: 2px solid transparent;
+        }
+        .lifestyle-tab.active {
+            border-color: #EA580C;
+            background-color: #FFF7ED; /* Orange 50 */
+        }
+        .lifestyle-tab.active .title-text {
+            color: #EA580C;
+        }
+
+        /* 로그인 게이트: 결과 블러 처리 */
+        #resultContent.locked {
+            filter: blur(8px);
+            user-select: none;
+            pointer-events: none;
+        }
+
+        /* 로그인 유도 오버레이 */
+        #loginOverlay {
+            position: absolute;
+            inset: 0;
+            z-index: 20;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            gap: 0.75rem;
+            padding: 1.5rem;
+            background: rgba(154, 52, 18, 0.35); /* orange-900 계열 반투명 */
+            border-radius: 1.5rem;
+        }
+        #loginOverlay.show {
+            display: flex;
         }
     </style>
+</head>
+<body class="text-gray-900 pb-20">
 
-    <div style="display: flex; flex-direction: column; gap: 8px; width: 100%; height: 100%;">
-        
-        <!-- 1. 헤더 영역 (초슬림 디자인) -->
-        <header style="display: flex; align-items: center; gap: 8px; margin-bottom: 2px; border-bottom: 1px solid #E2E8F0; padding-bottom: 4px;">
-            <span style="font-size: 22px; line-height: 1; user-select: none;">🐷</span>
-            <h1 style="font-size: 16px; font-weight: 800; color: #0F172A; margin: 0; letter-spacing: -0.03em;">
-                스마트 노후자금 <span style="color: #EA580C;">계산기</span>
-            </h1>
-            <span style="font-size: 11px; color: #64748B; font-weight: 500; margin-left: auto;">인터넷 무관 실시간 작동</span>
-        </header>
+<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-12 flex flex-col gap-8">
+    
+    <!-- 1. Header Area -->
+    <header class="text-center mb-6">
+        <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-orange-100 text-orange-600 mb-4 shadow-sm">
+            <i class="fa-solid fa-piggy-bank text-3xl"></i>
+        </div>
+        <h1 class="text-3xl sm:text-4xl lg:text-5xl font-black text-gray-900 leading-tight tracking-tight mb-3">스마트 노후자금 <span class="text-orange-600">계산기</span></h1>
+        <p class="text-base sm:text-lg text-gray-600 font-bold">막연한 은퇴 후의 삶, 필요한 자금이 얼마인지 정확히 알아보세요.</p>
+    </header>
 
-        <!-- 2. 입력 설정 영역 -->
-        <section style="background-color: #FFFFFF; padding: 10px; border-radius: 12px; border: 1px solid #E2E8F0; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
-            <div class="calc-grid-layout">
-                
-                <!-- 왼쪽 섹션: 나이 설정 슬라이더 -->
-                <div style="display: flex; flex-direction: column; gap: 8px;">
-                    <!-- 현재 나이 -->
-                    <div>
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px;">
-                            <span style="color: #475569; font-weight: 700; font-size: 12px;">현재 나이</span>
-                            <div style="display: flex; align-items: center; background-color: #F8FAFC; border: 1px solid #CBD5E1; border-radius: 6px; padding: 0 4px; width: 64px; height: 22px;">
-                                <input type="number" class="calc-current-age-input" style="width: 100%; border: none; background: transparent; font-size: 12px; font-weight: 700; text-align: right; outline: none; padding: 0; color: #1E293B;" value="50">
-                                <span style="color: #64748B; font-weight: 700; font-size: 10px; margin-left: 2px;">세</span>
-                            </div>
-                        </div>
-                        <input type="range" class="calc-current-age-range calc-range-slider" min="30" max="65" value="50">
-                    </div>
-
-                    <!-- 은퇴 예상 나이 -->
-                    <div>
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px;">
-                            <span style="color: #475569; font-weight: 700; font-size: 12px;">은퇴 나이</span>
-                            <div style="display: flex; align-items: center; background-color: #F8FAFC; border: 1px solid #CBD5E1; border-radius: 6px; padding: 0 4px; width: 64px; height: 22px;">
-                                <input type="number" class="calc-retire-age-input" style="width: 100%; border: none; background: transparent; font-size: 12px; font-weight: 700; text-align: right; outline: none; padding: 0; color: #1E293B;" value="60">
-                                <span style="color: #64748B; font-weight: 700; font-size: 10px; margin-left: 2px;">세</span>
-                            </div>
-                        </div>
-                        <input type="range" class="calc-retire-age-range calc-range-slider" min="50" max="75" value="60">
-                    </div>
-
-                    <!-- 예상 수명 -->
-                    <div>
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px;">
-                            <span style="color: #475569; font-weight: 700; font-size: 12px;">예상 수명</span>
-                            <div style="display: flex; align-items: center; background-color: #F8FAFC; border: 1px solid #CBD5E1; border-radius: 6px; padding: 0 4px; width: 64px; height: 22px;">
-                                <input type="number" class="calc-life-exp-input" style="width: 100%; border: none; background: transparent; font-size: 12px; font-weight: 700; text-align: right; outline: none; padding: 0; color: #1E293B;" value="85">
-                                <span style="color: #64748B; font-weight: 700; font-size: 10px; margin-left: 2px;">세</span>
-                            </div>
-                        </div>
-                        <input type="range" class="calc-life-exp-range calc-range-slider" min="70" max="100" value="85">
-                    </div>
-                </div>
-
-                <!-- 오른쪽 섹션: 가구 타입 및 생활비 입력 -->
-                <div style="display: flex; flex-direction: column; gap: 6px; justify-content: space-between;">
-                    <!-- 가구 형태 선택 -->
-                    <div>
-                        <span style="display: block; color: #475569; font-weight: 700; margin-bottom: 4px; font-size: 12px;">가구 형태</span>
-                        <div style="display: flex; background-color: #F1F5F9; padding: 2px; border-radius: 6px;">
-                            <button class="calc-btn-single calc-btn-active" style="flex: 1; padding: 4px; border-radius: 4px; font-size: 11px; font-weight: 700; border: none; cursor: pointer; background: transparent; color: #64748B; outline: none; transition: all 0.1s;">1인 가구</button>
-                            <button class="calc-btn-couple calc-btn-active" style="flex: 1; padding: 4px; border-radius: 4px; font-size: 11px; font-weight: 700; border: none; cursor: pointer; background: #FFFFFF; color: #EA580C; box-shadow: 0 1px 2px rgba(0,0,0,0.05); outline: none; transition: all 0.1s;">부부 (2인)</button>
-                        </div>
-                    </div>
-
-                    <!-- 희망 노후 생활비 -->
-                    <div>
-                        <span style="display: block; color: #475569; font-weight: 700; margin-bottom: 4px; font-size: 12px;">노후 생활비 (월)</span>
-                        <div style="display: flex; align-items: center; background-color: #F8FAFC; border: 1px solid #CBD5E1; border-radius: 8px; padding: 0 8px; height: 32px; width: 100%; box-sizing: border-box;">
-                            <input type="number" class="calc-monthly-expense-input" style="flex: 1; width: 100%; min-width: 0; border: none; background: transparent; font-size: 16px; font-weight: 800; text-align: right; color: #1E293B; outline: none; margin: 0; padding: 0;" value="300">
-                            <span style="color: #475569; font-weight: 800; font-size: 11px; margin-left: 4px; flex-shrink: 0;">만 원</span>
-                        </div>
-                        
-                        <!-- 생활비 퀵 프리셋 버튼 -->
-                        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; margin-top: 6px;">
-                            <button class="calc-preset-btn-1 calc-btn-active" style="padding: 4px 2px; display: flex; flex-direction: column; align-items: center; justify-content: center; background-color: #FFF7ED; color: #C2410C; border-radius: 6px; border: 1px solid #FFEDD5; cursor: pointer; outline: none;">
-                                <span style="font-size: 8px; font-weight: 600; color: #F97316;">최소</span>
-                                <span class="calc-preset-text-1" style="font-weight: 800; font-size: 11px;">200만</span>
-                            </button>
-                            <button class="calc-preset-btn-2 calc-btn-active" style="padding: 4px 2px; display: flex; flex-direction: column; align-items: center; justify-content: center; background-color: #FFF7ED; color: #C2410C; border-radius: 6px; border: 1px solid #FFEDD5; cursor: pointer; outline: none;">
-                                <span style="font-size: 8px; font-weight: 600; color: #F97316;">적정</span>
-                                <span class="calc-preset-text-2" style="font-weight: 800; font-size: 11px;">300만</span>
-                            </button>
-                            <button class="calc-preset-btn-3 calc-btn-active" style="padding: 4px 2px; display: flex; flex-direction: column; align-items: center; justify-content: center; background-color: #FFF7ED; color: #C2410C; border-radius: 6px; border: 1px solid #FFEDD5; cursor: pointer; outline: none;">
-                                <span style="font-size: 8px; font-weight: 600; color: #F97316;">여유</span>
-                                <span class="calc-preset-text-3" style="font-weight: 800; font-size: 11px;">500만</span>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- 3. 결과 대시보드 영역 (컴팩트 최적화) -->
-        <section style="background-color: #EA580C; padding: 12px; border-radius: 12px; box-shadow: 0 4px 10px rgba(234, 88, 12, 0.15); color: #FFFFFF; flex: 1; display: flex; flex-direction: column; justify-content: space-between; min-height: 160px;">
-            <div class="calc-result-layout">
-                
-                <!-- 결과 왼쪽: 세부 요약 정보 -->
-                <div style="display: flex; flex-direction: column; justify-content: space-between; border-right: 1px solid rgba(255, 255, 255, 0.2); padding-right: 8px;">
-                    <div>
-                        <span style="color: #FFEDD5; font-weight: 800; font-size: 12px; display: block; margin-bottom: 4px;">나의 노후 요약</span>
-                        <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 2px;">
-                            <span style="color: #FFEDD5; font-size: 10px;">은퇴까지 시간:</span>
-                            <span class="calc-years-to-retire" style="font-size: 15px; font-weight: 900; color: #FFFFFF;">10년</span>
-                        </div>
-                        <div style="display: flex; justify-content: space-between; align-items: baseline;">
-                            <span style="color: #FFEDD5; font-size: 10px;">은퇴 후 생활:</span>
-                            <span class="calc-years-in-retirement" style="font-size: 15px; font-weight: 900; color: #FFFFFF;">25년</span>
-                        </div>
-                    </div>
-                    
-                    <div style="background-color: rgba(194, 65, 12, 0.4); padding: 6px; border-radius: 6px; border: 1px solid rgba(255, 255, 255, 0.1); margin-top: 6px;">
-                        <p class="calc-insight-text" style="font-size: 10px; line-height: 1.4; margin: 0; word-break: keep-all; color: #FFE3D8;">
-                            지금부터 매월 <strong>...원</strong>씩 모아야 노후를 대비할 수 있습니다.
-                        </p>
-                    </div>
-                </div>
-
-                <!-- 결과 오른쪽: 자금 핵심 지표 -->
-                <div style="display: flex; flex-direction: column; justify-content: center; padding-left: 8px;">
-                    <div>
-                        <span style="color: #FFEDD5; font-weight: 800; font-size: 11px; display: block; margin-bottom: 2px;">노후에 필요한 총 자금</span>
-                        <div style="display: flex; align-items: baseline; gap: 2px; margin-bottom: 8px;">
-                            <span class="calc-total-required" style="font-size: 26px; font-weight: 900; color: #FEF08A; letter-spacing: -0.04em; line-height: 1;">9억</span>
-                            <span class="calc-total-required-detail" style="font-size: 13px; font-weight: 800; color: #FEF9C3;"></span>
-                        </div>
-                    </div>
-
-                    <div>
-                        <span style="color: #FFEDD5; font-weight: 800; font-size: 10px; display: block; margin-bottom: 2px;">매월 준비할 금액</span>
-                        <div style="display: flex; align-items: baseline; gap: 1px;">
-                            <span class="calc-monthly-saving" style="font-size: 20px; font-weight: 900; color: #FFFFFF; letter-spacing: -0.04em; line-height: 1;">300만</span>
-                            <span style="font-size: 12px; font-weight: 800; color: #FFEDD5;">원</span>
-                        </div>
-                    </div>
-                </div>
-
-            </div>
+    <!-- 2. Input Area -->
+    <section class="bg-white p-6 sm:p-8 rounded-3xl shadow-md border border-gray-200">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
             
-            <p style="font-size: 9px; color: #FFEDD5; opacity: 0.85; margin: 6px 0 0 0; text-align: center;">* 물가상승률, 이자율을 배제한 단순 합산 금액 기준입니다.</p>
-        </section>
+            <!-- Left: Basic Info -->
+            <div class="flex flex-col gap-6">
+                <div>
+                    <label class="block text-gray-700 font-bold mb-2 text-lg">현재 나이</label>
+                    <div class="flex items-center gap-4">
+                        <input type="range" id="currentAgeRange" min="30" max="65" value="50" oninput="syncInput('currentAge', this.value); calculate()">
+                        <div class="relative w-32 shrink-0">
+                            <!-- pr-12로 패딩 증가하여 글씨 겹침 방지 -->
+                            <input type="number" id="currentAgeInput" class="w-full bg-gray-50 border border-gray-300 rounded-xl py-3 px-4 text-xl font-bold text-right pr-12 focus:outline-none focus:border-orange-500" value="50" oninput="syncInput('currentAge', this.value); calculate()">
+                            <span class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 font-bold">세</span>
+                        </div>
+                    </div>
+                </div>
 
-        <!-- 4. 액션 버튼 (공유용) -->
-        <button class="calc-btn-share calc-btn-active" style="width: 100%; background-color: #FEE500; color: #1E1E1E; font-weight: 900; font-size: 14px; padding: 10px; border-radius: 8px; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; transition: background-color 0.2s, transform 0.1s; outline: none; margin-top: auto;">
-            <span style="font-size: 16px; line-height: 1; user-select: none;">💬</span>
-            계산 결과 친구에게 공유하기
-        </button>
+                <div>
+                    <label class="block text-gray-700 font-bold mb-2 text-lg">은퇴 예상 나이</label>
+                    <div class="flex items-center gap-4">
+                        <input type="range" id="retireAgeRange" min="50" max="75" value="60" oninput="syncInput('retireAge', this.value); calculate()">
+                        <div class="relative w-32 shrink-0">
+                            <!-- pr-12로 패딩 증가하여 글씨 겹침 방지 -->
+                            <input type="number" id="retireAgeInput" class="w-full bg-gray-50 border border-gray-300 rounded-xl py-3 px-4 text-xl font-bold text-right pr-12 focus:outline-none focus:border-orange-500" value="60" oninput="syncInput('retireAge', this.value); calculate()">
+                            <span class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 font-bold">세</span>
+                        </div>
+                    </div>
+                </div>
 
-    </div>
+                <div>
+                    <label class="block text-gray-700 font-bold mb-2 text-lg">예상 수명</label>
+                    <div class="flex items-center gap-4">
+                        <input type="range" id="lifeExpRange" min="70" max="100" value="85" oninput="syncInput('lifeExp', this.value); calculate()">
+                        <div class="relative w-32 shrink-0">
+                            <!-- pr-12로 패딩 증가하여 글씨 겹침 방지 -->
+                            <input type="number" id="lifeExpInput" class="w-full bg-gray-50 border border-gray-300 rounded-xl py-3 px-4 text-xl font-bold text-right pr-12 focus:outline-none focus:border-orange-500" value="85" oninput="syncInput('lifeExp', this.value); calculate()">
+                            <span class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 font-bold">세</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-    <!-- 안전한 브라우저 메시지용 토스트 노출 장치 -->
-    <div class="calc-toast" style="position: fixed; bottom: -50px; left: 50%; transform: translateX(-50%); background-color: #1E293B; color: #FFFFFF; padding: 8px 16px; border-radius: 20px; font-size: 11px; font-weight: 700; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2); transition: bottom 0.3s ease; z-index: 999999; display: flex; align-items: center; gap: 6px; white-space: nowrap;">
-        <span>✔️</span>
-        <span>결과 공유 링크가 클립보드에 복사되었습니다!</span>
-    </div>
+            <!-- Right: Lifestyle Selection -->
+            <div class="flex flex-col gap-6">
+                <!-- 가구 형태 선택 -->
+                <div>
+                    <label class="block text-gray-700 font-bold mb-3 text-lg">가구 형태</label>
+                    <div class="flex bg-gray-100 p-1.5 rounded-xl">
+                        <button id="btnSingle" class="flex-1 py-2.5 rounded-lg text-sm sm:text-base font-bold text-gray-500 transition-colors" onclick="setHousehold('single')">1인 가구</button>
+                        <button id="btnCouple" class="flex-1 py-2.5 rounded-lg text-sm sm:text-base font-bold bg-white text-orange-600 shadow-sm transition-colors" onclick="setHousehold('couple')">부부 (2인 가구)</button>
+                    </div>
+                </div>
 
-    <!-- 5. 뇌 역할을 해주는 자바스크립트 영역 (Pure Javascript 격리화 설계) -->
-    <script>
-        (function() {
-            function initializeCalculatorInstance(wrapper) {
-                if (wrapper.__calc_executed) return;
-                wrapper.__calc_executed = true; // 중복 마운트 원천 방지
-
-                // UI 엘리먼트 캐싱
-                const currentAgeRange = wrapper.querySelector('.calc-current-age-range');
-                const currentAgeInput = wrapper.querySelector('.calc-current-age-input');
-                const retireAgeRange = wrapper.querySelector('.calc-retire-age-range');
-                const retireAgeInput = wrapper.querySelector('.calc-retire-age-input');
-                const lifeExpRange = wrapper.querySelector('.calc-life-exp-range');
-                const lifeExpInput = wrapper.querySelector('.calc-life-exp-input');
+                <div>
+                    <label class="block text-gray-700 font-bold mb-2 text-lg">희망하는 노후 생활비 (월)</label>
+                    <div class="relative">
+                        <!-- pr-24로 우측 패딩을 크게 늘려 텍스트 중첩 문제 해결 -->
+                        <input type="number" id="monthlyExpenseInput" class="w-full bg-gray-50 border border-gray-300 rounded-xl py-4 px-5 text-3xl font-extrabold text-right pr-24 text-gray-800 focus:outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-100 transition-all" value="300" oninput="calculate()">
+                        <span class="absolute right-5 top-1/2 -translate-y-1/2 text-gray-500 font-bold text-xl">만 원</span>
+                    </div>
+                    
+                    <!-- 빠른 입력 버튼 -->
+                    <div class="grid grid-cols-3 gap-3 mt-4">
+                        <button id="presetBtn1" class="btn-press py-3 flex flex-col items-center justify-center bg-orange-50 text-orange-700 rounded-xl hover:bg-orange-100 transition-colors border border-orange-100" onclick="setExpense(200)">
+                            <span class="text-xs font-medium text-orange-500 mb-0.5">최소 생활비</span>
+                            <span id="presetText1" class="font-bold text-lg">200만</span>
+                        </button>
+                        <button id="presetBtn2" class="btn-press py-3 flex flex-col items-center justify-center bg-orange-50 text-orange-700 rounded-xl hover:bg-orange-100 transition-colors border border-orange-100" onclick="setExpense(300)">
+                            <span class="text-xs font-medium text-orange-500 mb-0.5">적정 생활비</span>
+                            <span id="presetText2" class="font-bold text-lg">300만</span>
+                        </button>
+                        <button id="presetBtn3" class="btn-press py-3 flex flex-col items-center justify-center bg-orange-50 text-orange-700 rounded-xl hover:bg-orange-100 transition-colors border border-orange-100" onclick="setExpense(500)">
+                            <span class="text-xs font-medium text-orange-500 mb-0.5">여유 생활비</span>
+                            <span id="presetText3" class="font-bold text-lg">500만</span>
+                        </button>
+                    </div>
+                </div>
                 
-                const btnSingle = wrapper.querySelector('.calc-btn-single');
-                const btnCouple = wrapper.querySelector('.calc-btn-couple');
-                const monthlyExpenseInput = wrapper.querySelector('.calc-monthly-expense-input');
+                <div class="mt-auto text-right">
+                    <p class="text-sm text-gray-400">* 금액을 직접 입력하시거나 버튼을 선택해주세요.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 3. Output Area -->
+    <section class="bg-orange-500 p-8 sm:p-10 rounded-3xl shadow-2xl relative overflow-hidden">
+
+        <!-- 로그인 유도 오버레이 (비로그인 시 표시) -->
+        <div id="loginOverlay">
+            <div class="w-14 h-14 rounded-full bg-white/90 flex items-center justify-center shadow-md">
+                <i class="fa-solid fa-lock text-2xl text-orange-600"></i>
+            </div>
+            <p class="text-white font-extrabold text-xl">결과를 확인하려면 로그인하세요</p>
+            <p class="text-orange-50 text-sm font-medium -mt-1">로그인하면 나의 노후 요약과 필요 자금을 바로 볼 수 있어요.</p>
+            <button onclick="goToLogin()" class="btn-press mt-2 bg-white text-orange-600 font-extrabold text-lg py-3 px-8 rounded-2xl shadow-md hover:bg-orange-50 transition-colors">
+                로그인 하기
+            </button>
+        </div>
+
+        <div id="resultContent" class="locked relative z-10 flex flex-col md:flex-row gap-10 md:gap-0 justify-between">
+            
+            <!-- 은퇴 정보 요약 -->
+            <div class="flex-1 md:border-r border-orange-400 md:pr-8">
+                <p class="text-orange-100 font-bold mb-4 text-lg">나의 노후 요약</p>
                 
-                const presetBtn1 = wrapper.querySelector('.calc-preset-btn-1');
-                const presetBtn2 = wrapper.querySelector('.calc-preset-btn-2');
-                const presetBtn3 = wrapper.querySelector('.calc-preset-btn-3');
-                
-                const presetText1 = wrapper.querySelector('.calc-preset-text-1');
-                const presetText2 = wrapper.querySelector('.calc-preset-text-2');
-                const presetText3 = wrapper.querySelector('.calc-preset-text-3');
+                <div class="flex items-baseline gap-2 mb-2">
+                    <span class="text-orange-100 font-medium">은퇴까지 남은 시간:</span>
+                    <span id="yearsToRetire" class="text-3xl font-black text-white">10년</span>
+                </div>
+                <div class="flex items-baseline gap-2 mb-6">
+                    <span class="text-orange-100 font-medium">은퇴 후 생활 기간:</span>
+                    <span id="yearsInRetirement" class="text-3xl font-black text-white">25년</span>
+                </div>
 
-                const yearsToRetireEl = wrapper.querySelector('.calc-years-to-retire');
-                const yearsInRetirementEl = wrapper.querySelector('.calc-years-in-retirement');
-                const totalRequiredEl = wrapper.querySelector('.calc-total-required');
-                const totalRequiredDetailEl = wrapper.querySelector('.calc-total-required-detail');
-                const monthlySavingEl = wrapper.querySelector('.calc-monthly-saving');
-                const insightTextEl = wrapper.querySelector('.calc-insight-text');
-                const btnShare = wrapper.querySelector('.calc-btn-share');
+                <div class="bg-orange-600/50 p-4 rounded-xl border border-orange-400/50">
+                    <p class="text-sm text-white font-medium leading-relaxed" id="insightText">
+                        지금부터 매월 <strong class="text-white">XXX만 원</strong>씩 모아야 은퇴 후 <strong class="text-white">XX년</strong> 동안 월 <strong class="text-white">XXX만 원</strong>의 생활비를 쓸 수 있습니다.
+                    </p>
+                </div>
+            </div>
 
-                let currentPreset1 = 200;
-                let currentPreset2 = 300;
-                let currentPreset3 = 500;
+            <!-- 핵심 자금 결과 -->
+            <div class="flex-1 md:pl-8 flex flex-col justify-center">
+                <p class="text-orange-100 font-bold mb-2 text-lg">노후에 필요한 총 자금</p>
+                <div class="flex items-baseline gap-2 mb-8">
+                    <span id="totalRequired" class="text-5xl sm:text-6xl font-black text-yellow-200 tracking-tighter">6억</span>
+                    <span id="totalRequiredDetail" class="text-2xl font-bold text-yellow-100"></span>
+                </div>
 
-                // 1. 현재 나이 동기화 및 유효성 바인딩
-                if (currentAgeRange && currentAgeInput) {
-                    currentAgeRange.addEventListener('input', function() {
-                        let val = parseInt(this.value) || 30;
-                        const retireVal = parseInt(retireAgeInput.value) || 60;
-                        if (val >= retireVal) {
-                            val = retireVal - 1;
-                            this.value = val;
-                        }
-                        currentAgeInput.value = val;
-                        calculate();
-                    });
-                    currentAgeInput.addEventListener('input', function() {
-                        let val = parseInt(this.value);
-                        if (!isNaN(val)) {
-                            currentAgeRange.value = val;
-                        }
-                        calculate();
-                    });
-                    currentAgeInput.addEventListener('blur', function() {
-                        let val = parseInt(this.value) || 50;
-                        if (val < 30) val = 30;
-                        if (val > 65) val = 65;
-                        const retireVal = parseInt(retireAgeInput.value) || 60;
-                        if (val >= retireVal) val = retireVal - 1;
-                        this.value = val;
-                        currentAgeRange.value = val;
-                        calculate();
-                    });
-                }
+                <p class="text-orange-100 font-bold mb-2 text-sm">지금부터 매월 모아야 할 금액</p>
+                <div class="flex items-baseline gap-2">
+                    <span id="monthlySaving" class="text-4xl font-black text-white tracking-tighter">500만</span>
+                    <span class="text-xl font-bold text-orange-200">원</span>
+                </div>
+                <p class="text-xs text-orange-200 mt-2">* 물가상승률, 이자율을 제외한 단순 금액 기준입니다.</p>
+            </div>
 
-                // 2. 은퇴 예정 나이 동기화 및 유효성 바인딩
-                if (retireAgeRange && retireAgeInput) {
-                    retireAgeRange.addEventListener('input', function() {
-                        let val = parseInt(this.value) || 50;
-                        const currentVal = parseInt(currentAgeInput.value) || 30;
-                        const lifeVal = parseInt(lifeExpInput.value) || 85;
-                        if (val <= currentVal) {
-                            val = currentVal + 1;
-                            this.value = val;
-                        }
-                        if (val >= lifeVal) {
-                            val = lifeVal - 1;
-                            this.value = val;
-                        }
-                        retireAgeInput.value = val;
-                        calculate();
-                    });
-                    retireAgeInput.addEventListener('input', function() {
-                        let val = parseInt(this.value);
-                        if (!isNaN(val)) {
-                            retireAgeRange.value = val;
-                        }
-                        calculate();
-                    });
-                    retireAgeInput.addEventListener('blur', function() {
-                        let val = parseInt(this.value) || 60;
-                        if (val < 50) val = 50;
-                        if (val > 75) val = 75;
-                        const currentVal = parseInt(currentAgeInput.value) || 50;
-                        const lifeVal = parseInt(lifeExpInput.value) || 85;
-                        if (val <= currentVal) val = currentVal + 1;
-                        if (val >= lifeVal) val = lifeVal - 1;
-                        this.value = val;
-                        retireAgeRange.value = val;
-                        calculate();
-                    });
-                }
+        </div>
 
-                // 3. 예상 수명 동기화 및 유효성 바인딩
-                if (lifeExpRange && lifeExpInput) {
-                    lifeExpRange.addEventListener('input', function() {
-                        let val = parseInt(this.value) || 70;
-                        const retireVal = parseInt(retireAgeInput.value) || 60;
-                        if (val <= retireVal) {
-                            val = retireVal + 1;
-                            this.value = val;
-                        }
-                        lifeExpInput.value = val;
-                        calculate();
-                    });
-                    lifeExpInput.addEventListener('input', function() {
-                        let val = parseInt(this.value);
-                        if (!isNaN(val)) {
-                            lifeExpRange.value = val;
-                        }
-                        calculate();
-                    });
-                    lifeExpInput.addEventListener('blur', function() {
-                        let val = parseInt(this.value) || 85;
-                        if (val < 70) val = 70;
-                        if (val > 100) val = 100;
-                        const retireVal = parseInt(retireAgeInput.value) || 60;
-                        if (val <= retireVal) val = retireVal + 1;
-                        this.value = val;
-                        lifeExpRange.value = val;
-                        calculate();
-                    });
-                }
+    </section>
 
-                // 4. 희망 월 생활비 바인딩
-                if (monthlyExpenseInput) {
-                    monthlyExpenseInput.addEventListener('input', calculate);
-                }
-
-                // 5. 가구 형태 버튼 바인딩
-                if (btnSingle) {
-                    btnSingle.addEventListener('click', function() { setHousehold('single'); });
-                }
-                if (btnCouple) {
-                    btnCouple.addEventListener('click', function() { setHousehold('couple'); });
-                }
-
-                // 6. 프리셋 버튼 바인딩
-                if (presetBtn1) {
-                    presetBtn1.addEventListener('click', function() { setExpense(currentPreset1); });
-                }
-                if (presetBtn2) {
-                    presetBtn2.addEventListener('click', function() { setExpense(currentPreset2); });
-                }
-                if (presetBtn3) {
-                    presetBtn3.addEventListener('click', function() { setExpense(currentPreset3); });
-                }
-
-                // 7. 결과 공유 기능 바인딩 (클립보드 강제 우회 복사)
-                if (btnShare) {
-                    btnShare.addEventListener('click', function() {
-                        const tempInput = document.createElement('input');
-                        tempInput.value = window.location.href;
-                        document.body.appendChild(tempInput);
-                        tempInput.select();
-                        document.execCommand('copy');
-                        document.body.removeChild(tempInput);
-
-                        const toast = wrapper.querySelector('.calc-toast');
-                        if (toast) {
-                            toast.style.bottom = '12px';
-                            setTimeout(function() {
-                                toast.style.bottom = '-50px';
-                            }, 2500);
-                        }
-                    });
-                }
-
-                // 가구 형태 변경 비즈니스 로직
-                function setHousehold(type) {
-                    if (type === 'single') {
-                        btnSingle.style.backgroundColor = '#FFFFFF';
-                        btnSingle.style.color = '#EA580C';
-                        btnSingle.style.boxShadow = '0 1px 2px rgba(0,0,0,0.05)';
-                        
-                        btnCouple.style.backgroundColor = 'transparent';
-                        btnCouple.style.color = '#64748B';
-                        btnCouple.style.boxShadow = 'none';
-
-                        currentPreset1 = 150;
-                        currentPreset2 = 200;
-                        currentPreset3 = 300;
-                    } else {
-                        btnCouple.style.backgroundColor = '#FFFFFF';
-                        btnCouple.style.color = '#EA580C';
-                        btnCouple.style.boxShadow = '0 1px 2px rgba(0,0,0,0.05)';
-                        
-                        btnSingle.style.backgroundColor = 'transparent';
-                        btnSingle.style.color = '#64748B';
-                        btnSingle.style.boxShadow = 'none';
-
-                        currentPreset1 = 200;
-                        currentPreset2 = 300;
-                        currentPreset3 = 500;
-                    }
-
-                    if (presetText1) presetText1.innerText = currentPreset1 + '만';
-                    if (presetText2) presetText2.innerText = currentPreset2 + '만';
-                    if (presetText3) presetText3.innerText = currentPreset3 + '만';
-
-                    setExpense(currentPreset2);
-                }
-
-                function setExpense(amount) {
-                    if (monthlyExpenseInput) {
-                        monthlyExpenseInput.value = amount;
-                        calculate();
-                    }
-                }
-
-                // 화폐 기호 정형화
-                function formatKoreanCurrency(manwon) {
-                    if (manwon <= 0) return { main: "0원", detail: "" };
-                    const eok = Math.floor(manwon / 10000);
-                    const remainder = manwon % 10000;
-                    let main = "";
-                    let detail = "";
-
-                    if (eok > 0) {
-                        main = eok + "억";
-                        if (remainder > 0) {
-                            detail = remainder.toLocaleString() + "만";
-                        } else {
-                            detail = "원";
-                        }
-                    } else {
-                        main = remainder.toLocaleString() + "만";
-                        detail = "원";
-                    }
-                    return { main: main, detail: detail };
-                }
-
-                // 실시간 노후 대시보드 산출 공식
-                function calculate() {
-                    if (!currentAgeInput || !retireAgeInput || !lifeExpInput || !monthlyExpenseInput) return;
-
-                    const currentAge = parseInt(currentAgeInput.value) || 0;
-                    const retireAge = parseInt(retireAgeInput.value) || 0;
-                    const lifeExp = parseInt(lifeExpInput.value) || 0;
-                    let monthlyExpense = parseInt(monthlyExpenseInput.value) || 0;
-
-                    const yearsToRetire = retireAge - currentAge;
-                    const yearsInRetirement = lifeExp - retireAge;
-                    
-                    if (yearsToRetire <= 0 || yearsInRetirement <= 0) {
-                         if (yearsToRetireEl) yearsToRetireEl.innerText = "- 년";
-                         if (yearsInRetirementEl) yearsInRetirementEl.innerText = "- 년";
-                         if (totalRequiredEl) totalRequiredEl.innerText = "0";
-                         if (totalRequiredDetailEl) totalRequiredDetailEl.innerText = "원";
-                         if (monthlySavingEl) monthlySavingEl.innerText = "0";
-                         if (insightTextEl) insightTextEl.innerHTML = "조건이 올바르지 않습니다.";
-                         return;
-                    }
-
-                    const totalRequiredManwon = monthlyExpense * 12 * yearsInRetirement;
-                    const monthsToRetire = yearsToRetire * 12;
-                    const monthlySavingManwon = Math.ceil(totalRequiredManwon / monthsToRetire);
-
-                    if (yearsToRetireEl) yearsToRetireEl.innerText = yearsToRetire + "년";
-                    if (yearsInRetirementEl) yearsInRetirementEl.innerText = yearsInRetirement + "년";
-                    
-                    const formattedTotal = formatKoreanCurrency(totalRequiredManwon);
-                    if (totalRequiredEl) totalRequiredEl.innerText = formattedTotal.main;
-                    if (totalRequiredDetailEl) totalRequiredDetailEl.innerText = formattedTotal.detail;
-                    
-                    if (monthlySavingEl) monthlySavingEl.innerText = monthlySavingManwon.toLocaleString() + '만';
-                    
-                    if (insightTextEl) {
-                        insightTextEl.innerHTML = "매월 <strong style='color:#FFF;'>" + monthlySavingManwon.toLocaleString() + "만 원</strong>씩 모아야 월 <strong style='color:#FFF;'>" + monthlyExpense + "만 원</strong>씩 사용 가능합니다.";
-                    }
-                }
-
-                calculate();
-            }
-
-            // 안전한 복합 부트스트랩 엔진
-            function scanAndBootCalculators() {
-                const wrappers = document.querySelectorAll('.calc-wrapper');
-                for (let i = 0; i < wrappers.length; i++) {
-                    initializeCalculatorInstance(wrappers[i]);
-                }
-            }
-
-            if (document.readyState === 'loading') {
-                document.addEventListener('DOMContentLoaded', scanAndBootCalculators);
-            } else {
-                scanAndBootCalculators();
-            }
-
-            setInterval(scanAndBootCalculators, 300);
-        })();
-    </script>
+    <!-- 4. 외부 카카오톡 공유 버튼 -->
+    <button onclick="alert('카카오톡 공유 API가 호출됩니다. [내 노후자금 계산 결과 공유하기]')" class="btn-press mt-2 w-full bg-[#FEE500] text-[#000000] font-extrabold text-xl py-5 rounded-3xl shadow-sm hover:bg-[#F4DC00] flex items-center justify-center gap-2 transition-colors">
+        <i class="fa-solid fa-comment text-2xl"></i> 카카오톡으로 공유하기
+    </button>
 
 </div>
-<!-- 스마트 노후 자금 계산기 끝 -->
+
+<script>
+    // 글로벌 변수
+    let householdType = 'couple';
+
+    // ------------------------------
+    // 로그인 게이트
+    // ------------------------------
+    // TODO: 실제 서비스 연동 시, 이 값을 로그인 세션/쿠키 확인 로직으로 교체하세요.
+    const isLoggedIn = false;
+
+    // 로그인 페이지 URL
+    const LOGIN_URL = 'https://m.saramin.co.kr/login?url=https%3A%2F%2Fsenior.saramin.co.kr%2F';
+
+    function goToLogin() {
+        window.location.href = LOGIN_URL;
+    }
+
+    function applyLoginGate() {
+        const resultContent = document.getElementById('resultContent');
+        const overlay = document.getElementById('loginOverlay');
+
+        if (isLoggedIn) {
+            resultContent.classList.remove('locked');
+            overlay.classList.remove('show');
+        } else {
+            resultContent.classList.add('locked');
+            overlay.classList.add('show');
+        }
+    }
+
+    // Range와 Input Number 동기화
+    function syncInput(baseId, value) {
+        let val = parseInt(value);
+        if (isNaN(val)) val = '';
+        
+        const inputEl = document.getElementById(baseId + 'Input');
+        const rangeEl = document.getElementById(baseId + 'Range');
+
+        // 사용자가 직접 타이핑 중일 때는 강제 변환을 멈춤
+        if (document.activeElement === inputEl) {
+            if (val !== '') rangeEl.value = val;
+            return;
+        }
+
+        if (val === '') val = 0;
+        
+        // 유효성 검사 (나이 논리)
+        if (baseId === 'currentAge') {
+            const retireAge = parseInt(document.getElementById('retireAgeInput').value);
+            if (val >= retireAge) val = retireAge - 1; 
+        } else if (baseId === 'retireAge') {
+            const currentAge = parseInt(document.getElementById('currentAgeInput').value);
+            const lifeExp = parseInt(document.getElementById('lifeExpInput').value);
+            if (val <= currentAge) val = currentAge + 1;
+            if (val >= lifeExp) val = lifeExp - 1;
+        } else if (baseId === 'lifeExp') {
+            const retireAge = parseInt(document.getElementById('retireAgeInput').value);
+            if (val <= retireAge) val = retireAge + 1;
+        }
+
+        inputEl.value = val;
+        rangeEl.value = val;
+    }
+    
+    // 입력창 포커스 아웃(blur) 시 최종 유효성 검사 후 값 고정
+    function enforceBounds(baseId) {
+        const inputEl = document.getElementById(baseId + 'Input');
+        syncInput(baseId, inputEl.value);
+        calculate();
+    }
+
+    // 생활비 빠른 입력 버튼
+    function setExpense(amount) {
+        document.getElementById('monthlyExpenseInput').value = amount;
+        calculate();
+    }
+
+    // 가구 형태 세팅 로직
+    function setHousehold(type) {
+        householdType = type;
+        const btnSingle = document.getElementById('btnSingle');
+        const btnCouple = document.getElementById('btnCouple');
+        
+        if (type === 'single') {
+            // 버튼 UI 토글
+            btnSingle.classList.add('bg-white', 'text-orange-600', 'shadow-sm');
+            btnSingle.classList.remove('text-gray-500');
+            btnCouple.classList.remove('bg-white', 'text-orange-600', 'shadow-sm');
+            btnCouple.classList.add('text-gray-500');
+            
+            // 1인 가구 추천 프리셋 (150만, 200만, 300만)
+            updatePresets(150, 200, 300);
+        } else {
+            // 버튼 UI 토글
+            btnCouple.classList.add('bg-white', 'text-orange-600', 'shadow-sm');
+            btnCouple.classList.remove('text-gray-500');
+            btnSingle.classList.remove('bg-white', 'text-orange-600', 'shadow-sm');
+            btnSingle.classList.add('text-gray-500');
+            
+            // 부부 가구 추천 프리셋 (200만, 300만, 500만)
+            updatePresets(200, 300, 500);
+        }
+    }
+
+    // 프리셋 버튼 값 업데이트 함수
+    function updatePresets(min, std, lux) {
+        document.getElementById('presetBtn1').setAttribute('onclick', `setExpense(${min})`);
+        document.getElementById('presetText1').innerText = `${min}만`;
+        
+        document.getElementById('presetBtn2').setAttribute('onclick', `setExpense(${std})`);
+        document.getElementById('presetText2').innerText = `${std}만`;
+        
+        document.getElementById('presetBtn3').setAttribute('onclick', `setExpense(${lux})`);
+        document.getElementById('presetText3').innerText = `${lux}만`;
+        
+        // 가구 형태 변경 시 자동으로 '적정 생활비'를 입력창에 세팅
+        setExpense(std);
+    }
+
+    // 한국어 금액 포맷터
+    function formatKoreanCurrency(manwon) {
+        if (manwon <= 0) return { main: "0원", detail: "" };
+        
+        const eok = Math.floor(manwon / 10000);
+        const remainder = manwon % 10000;
+        
+        let main = "";
+        let detail = "";
+
+        if (eok > 0) {
+            main = `${eok}억`;
+            if (remainder > 0) {
+                detail = `${remainder.toLocaleString()}만 원`;
+            } else {
+                detail = "원";
+            }
+        } else {
+            main = `${remainder.toLocaleString()}만`;
+            detail = "원";
+        }
+
+        return { main, detail };
+    }
+
+    // 핵심 계산 로직
+    function calculate() {
+        const currentAge = parseInt(document.getElementById('currentAgeInput').value);
+        const retireAge = parseInt(document.getElementById('retireAgeInput').value);
+        const lifeExp = parseInt(document.getElementById('lifeExpInput').value);
+        
+        let monthlyExpense = parseInt(document.getElementById('monthlyExpenseInput').value);
+        if (isNaN(monthlyExpense) || monthlyExpense < 0) monthlyExpense = 0;
+
+        // 기간 계산
+        const yearsToRetire = retireAge - currentAge;
+        const yearsInRetirement = lifeExp - retireAge;
+        
+        // 예외 처리
+        if (yearsToRetire <= 0 || yearsInRetirement <= 0) {
+             document.getElementById('yearsToRetire').innerText = "- 년";
+             document.getElementById('yearsInRetirement').innerText = "- 년";
+             document.getElementById('totalRequired').innerText = "0";
+             document.getElementById('totalRequiredDetail').innerText = "원";
+             document.getElementById('monthlySaving').innerText = "0";
+             document.getElementById('insightText').innerHTML = "나이 설정을 다시 확인해주세요.";
+             return;
+        }
+
+        // 1. 필요한 총 자금 (만원 단위) = 월 생활비 * 12개월 * 은퇴 후 기간
+        const totalRequiredManwon = monthlyExpense * 12 * yearsInRetirement;
+        
+        // 2. 매월 모아야 할 금액 (만원 단위) = 필요한 총 자금 / (남은 기간 * 12개월)
+        const monthsToRetire = yearsToRetire * 12;
+        const monthlySavingManwon = Math.ceil(totalRequiredManwon / monthsToRetire);
+
+        // UI 업데이트
+        document.getElementById('yearsToRetire').innerText = `${yearsToRetire}년`;
+        document.getElementById('yearsInRetirement').innerText = `${yearsInRetirement}년`;
+        
+        const formattedTotal = formatKoreanCurrency(totalRequiredManwon);
+        document.getElementById('totalRequired').innerText = formattedTotal.main;
+        document.getElementById('totalRequiredDetail').innerText = formattedTotal.detail;
+        
+        document.getElementById('monthlySaving').innerText = monthlySavingManwon.toLocaleString() + '만';
+        
+        document.getElementById('insightText').innerHTML = `지금부터 매월 <strong class="text-white">${monthlySavingManwon.toLocaleString()}만 원</strong>씩 모아야 은퇴 후 <strong class="text-white">${yearsInRetirement}년</strong> 동안 월 <strong class="text-white">${monthlyExpense}만 원</strong>의 생활비를 쓸 수 있습니다.`;
+    }
+
+    // 초기 실행
+    document.addEventListener("DOMContentLoaded", () => {
+        ['currentAge', 'retireAge', 'lifeExp'].forEach(id => {
+            document.getElementById(id + 'Input').addEventListener('blur', () => enforceBounds(id));
+        });
+        applyLoginGate();
+        calculate();
+    });
+
+</script>
+
+</body>
+</html>
